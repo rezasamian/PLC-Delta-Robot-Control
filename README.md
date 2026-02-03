@@ -8,7 +8,7 @@ This project involves the PLC-based control of a Delta Robot used for high-speed
 
 The control software is structured using a hierarchical state-machine and modular motion control blocks.
 
-### 🔁 Main State Machine (`State_Prog`)
+### 🔁 Main State Machine
 
 The system operates using defined machine states:
 - **Reset_State** – System reset
@@ -22,7 +22,7 @@ The system operates using defined machine states:
 
 ---
 
-### Robot Motion Program (`R1_Motion_Prg`)
+### Robot Motion Program 
 
 Handles all robot-related motion coordination.
 
