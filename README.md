@@ -11,14 +11,14 @@ The control software is structured using a hierarchical state-machine and modula
 ### 🔁 Main State Machine (`State_Prog`)
 
 The system operates using defined machine states:
-
+- **Reset_State** – System reset
 - **Resetting_State** – System reset and homing checks  
 - **Idle_State** – Waiting for start command  
 - **Starting_State** – Pre-start checks and robot enable  
 - **Running_State** – Normal automatic pick-and-place operation  
 - **Stopping_State** – Controlled stop sequence  
 - **Aborting_State** – Emergency or fault stop handling  
-- **Manual_State** – Manual jog and maintenance mode  
+- **Manual_State** – Manual mode  
 
 ---
 
@@ -30,8 +30,7 @@ Submodules:
 
 - **R1_Servo_Ctrl** – Servo enable, status monitoring, and motion permission  
 - **R1_Robot_Init** – Robot initialization and homing sequence  
-- **R1_Automatic** – Automatic pick-and-place trajectory triggering
-
+- **R1_Automatic** – Automatic pick-and-place
 ## 🔒 Note on Source Code
 
 The full PLC program is not publicly available due to academic project restrictions.  
