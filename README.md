@@ -27,10 +27,9 @@ The system operates using defined machine states:
 Handles all robot-related motion coordination.
 
 Submodules:
-
-- **R1_Servo_Ctrl** – Servo enable, status monitoring, and motion permission  
-- **R1_Robot_Init** – Robot initialization and homing sequence  
+- **R1_Servo_Ctrl** – Servo enable, grouping servers, and calling kinemtaics  
 - **R1_Automatic** – Automatic pick-and-place
+
 ## 🔒 Note on Source Code
 
 The full PLC program is not publicly available due to academic project restrictions.  
