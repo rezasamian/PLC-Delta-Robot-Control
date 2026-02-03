@@ -22,7 +22,7 @@ The system operates using defined machine states:
 
 ---
 
-### 🤖 Robot Motion Program (`R1_Motion_Prg`)
+### Robot Motion Program (`R1_Motion_Prg`)
 
 Handles all robot-related motion coordination.
 
