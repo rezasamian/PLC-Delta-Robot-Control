@@ -36,4 +36,4 @@ The full PLC program is not publicly available due to academic project restricti
 However, system architecture, control strategy, and engineering approach are documented here to demonstrate technical competence.
 ## 💻 Kinematics of Delta robot (MATLAB)
 📁 [FK](Kinematics/ForwardKinematics)
-📁 [IK](Kinematics/InverseKinmatics)
+📁 [IK](Kinematics/InverseKinematics)
