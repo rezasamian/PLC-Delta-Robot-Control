@@ -1,0 +1,89 @@
+
+function t = delta_inverse_kinematics(End_pos)
+    % Inverse kinematics for a delta robot. Returns joint angles (rad) for
+    % three arms given end-effector position [x; y; z].
+
+    BasePlateRadius = 0.115/cosd(30) ;  %BasePlate Hexagon Radius 
+    UpperArmLength=    0.15;       % Upper arm length
+    MovingPlateRadius = 0.045/cosd(30) ;  %MovingPlate Hexagon Radius 0.03
+    LowerArmLength=     0.435;       % Upper arm length0.5
+
+
+
+    % End-effector coordinates 
+    x = End_pos(1);
+    y = End_pos(2);        
+    z = End_pos(3);     
+
+    % Base circle parameters (fixed for all arms)
+    x0 = BasePlateRadius * cosd(30);
+    z0 = 0;
+    r0 = UpperArmLength;
+
+    % Rotation angles for each arm (degrees)
+    rot_angles = [90, 210, -30];
+    t = zeros(3, 1);
+
+    for i = 1:3
+        % Rotate end-effector coordinates by the arm's rotation angle
+        theta = rot_angles(i);
+        xr = -(x * cosd(theta) - y * sind(theta));
+        yr = -(x * sind(theta) + y * cosd(theta));   % note sign convention
+        zr = z;                                     % z unaffected
+
+        % Parameters for the moving circle attached to this arm
+        x1 = xr + MovingPlateRadius * cosd(30);
+        z1 = -zr;
+        r1 = sqrt(LowerArmLength^2 - yr^2);
+
+        % Find intersection angles of the two circles
+        angles = circleIntersectionAngles(x0, z0, r0, x1, z1, r1);
+
+        % Select the appropriate solution (second angle)
+        t(i) = deg2rad(angles(2));
+    end
+end
+
+function angles = circleIntersectionAngles(x0, z0, r0, x1, z1, r1)
+    % Find intersection points of two circles and compute their angles
+    % relative to the base center (x0,y0).
+    [xi, zi] = circleIntersection(x0, z0, r0, x1, z1, r1);
+
+    if isempty(xi)
+        angles = [];
+        return;
+    end
+
+    % Vector from base center to each intersection
+    v = [xi(:) - x0, zi(:) - z0];
+    angles = atan2d(v(:,2), v(:,1));   % degrees
+end
+
+function [x, z] = circleIntersection(x0, z0, r0, x1, z1, r1)
+    % Compute intersection points of two circles.
+    d = hypot(x1 - x0, z1 - z0);
+
+    % No intersection or circles coincide
+    if d > r0 + r1 || d < abs(r0 - r1) || (d == 0 && r0 == r1)
+        x = []; z = [];
+        return;
+    end
+
+    a = (r0^2 - r1^2 + d^2) / (2*d);
+    h = sqrt(r0^2 - a^2);
+
+    xm = x0 + a * (x1 - x0) / d;
+    zm = z0 + a * (z1 - z0) / d;
+
+    dx = -h * (z1 - z0) / d;
+    dz =  h * (x1 - x0) / d;
+
+    x = [xm + dx; xm - dx];
+    z = [zm + dz; zm - dz];
+
+    % If tangent, return only one point
+    if h == 0
+        x = x(1); z = z(1);
+    end
+end
+
