@@ -1,0 +1,99 @@
+function Xn = delta_forward_kinematics(theta1,theta2,theta3)
+    % ---------------------------------------------------------------------
+    % 1. Preliminary constants and angle conversion
+    % ---------------------------------------------------------------------
+    alpha = [90, 210, 330];                % angular positions of the arms [deg]
+    theta = [theta1, theta2, theta3];     % joint angles [deg]
+
+    BasePlateRadius = 0.115/cosd(30) ;  %BasePlate Hexagon Radius 
+    UpperArmLength=0.15;       % Upper arm length
+    MovingPlateRadius = 0.045/cosd(30) ;  %MovingPlate Hexagon Radius 0.03
+    LowerArmLength=0.435;       % Upper arm length0.5
+    R=(BasePlateRadius-MovingPlateRadius)*cosd(30);
+    lA=UpperArmLength;
+    re=LowerArmLength;
+    % Convert to radians for trigonometric functions (optional, using cosd/sind)
+    % We use cosd and sind directly, so no conversion needed.
+
+    % ---------------------------------------------------------------------
+    % 2. Compute elbow coordinates (sphere centres) in the base frame
+    % ---------------------------------------------------------------------
+    x_i=zeros(3);
+    y_i=zeros(3);
+    z_i=zeros(3);
+    for i = 1:3
+        % Coordinates
+        x_i(i) = -( R + lA * cosd(theta(i))) * cosd(alpha(i));
+        y_i(i) = ( R + lA * cosd(theta(i))) * sind(alpha(i)); 
+        z_i(i) = -lA * sind(theta(i));      % negative sign as per description
+    end
+
+    w = x_i.^2 + y_i.^2 + z_i.^2;
+
+    % Matrix A (2 rows: [i=2, i=3] minus i=1)
+    A = [ x_i(2)-x_i(1), y_i(2)-y_i(1), z_i(2)-z_i(1);
+          x_i(3)-x_i(1), y_i(3)-y_i(1), z_i(3)-z_i(1) ];
+
+    % Right‑hand side vector b
+    b = 0.5 * [ w(2)-w(1);
+                w(3)-w(1) ];
+
+
+    M = A(:, 1:2);                % coefficients for x and y
+    % if abs(det(M)) < 1e-12
+    %     error('The projection onto the xy‑plane is singular. Cannot solve for x and y uniquely.');
+    % end
+
+    % Compute constant vector and coefficient vector for z
+    const = M \ b;                 % [b1; b2] such that [x;y] = const when z=0
+    coeff_z = M \ (-A(:,3));       % [a1; a2] such that [x;y] = const + coeff_z * z
+
+    a1 = coeff_z(1);
+    a2 = coeff_z(2);
+    b1 = const(1);
+    b2 = const(2);
+
+    % Now we have:
+    %   x = a1 * z + b1
+    %   y = a2 * z + b2
+
+    % ---------------------------------------------------------------------
+    % 5. Substitute into the first sphere equation to obtain a quadratic in z
+    %    (x - x1)^2 + (y - y1)^2 + (z - z1)^2 = re^2
+    % ---------------------------------------------------------------------
+    % Expand:
+    %   (a1*z + b1 - x1)^2 + (a2*z + b2 - y1)^2 + (z - z1)^2 - re^2 = 0
+    % Collect terms in z^2, z, constant.
+    alpha_q = a1^2 + a2^2 + 1;
+    beta_q  = 2 * ( a1*(b1 - x_i(1)) + a2*(b2 - y_i(1)) - z_i(1) );
+    gamma_q = (b1 - x_i(1))^2 + (b2 - y_i(1))^2 + z_i(1)^2 - re^2;
+
+    % Solve quadratic: alpha_q * z^2 + beta_q * z + gamma_q = 0
+    discriminant = beta_q^2 - 4*alpha_q*gamma_q;
+    Xn = zeros(3,1);
+    if discriminant < -1e-12
+        error('No real intersection of the three spheres. Check input parameters.');
+    elseif abs(discriminant) < 1e-12
+        % One real solution (double root)
+        z = -beta_q / (2*alpha_q);
+        x = a1*z + b1;
+        y = a2*z + b2;
+        warning('Discriminant nearly zero: only one solution found.');
+    else
+        % Two real solutions
+        sqrt_disc = sqrt(discriminant);
+        z1 = (-beta_q + sqrt_disc) / (2*alpha_q);
+        z2 = (-beta_q - sqrt_disc) / (2*alpha_q);
+
+        % Compute corresponding x,y for each
+        x1 = a1*z1 + b1;   y1_sol = a2*z1 + b2;
+        x2 = a1*z2 + b1;   y2_sol = a2*z2 + b2;
+
+        x = x2;
+        y = y2_sol;
+        z = z2;
+        % fprintf('Two solutions exist. Returning the first (z = %f).\n', z);
+        % fprintf('Second solution: z = %f, (x,y) = (%f, %f)\n', z2, x2, y2_sol);
+        Xn=[x;y;z];
+    end
+end
