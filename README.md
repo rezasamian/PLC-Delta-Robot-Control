@@ -32,7 +32,7 @@ Submodules:
 
 ## 🔒 Note on Source Code
 
-The full PLC program is not publicly available due to academic project restrictions.  
+The forward and inverse kinematics of the delta robot is provided. The full PLC program is not publicly available due to academic project restrictions.  
 However, system architecture, control strategy, and engineering approach are documented here to demonstrate technical competence.
 ## 💻 Kinematics of Delta robot (MATLAB)
 📁 [Forward Kinematics of Delta Robot](Kinematics/ForwardKinematics)
